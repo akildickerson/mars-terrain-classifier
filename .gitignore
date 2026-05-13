@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/
+checkpoints/
+configs/config.yaml
+.env
+.DS_Store
+.idea/
+.vscode/
