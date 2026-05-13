@@ -10,7 +10,7 @@ class AStarPlanner:
                 "soil": 1.0,
                 "bedrock": 2.0,
                 "sand": 3.0,
-                "large_rock": 10,
+                "large_rock": 10.0,
             }
         self.costs = costs
 
