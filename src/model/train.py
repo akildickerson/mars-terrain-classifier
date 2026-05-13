@@ -24,6 +24,6 @@ def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
             optim.zero_grad()
             logits = model.forward(img)
             cost = loss(logits, label)
-            cost.backwards()
+            cost.backward()
             optim.step()
         print(f"epoch: {epoch} \t loss:{cost:.4f}")
