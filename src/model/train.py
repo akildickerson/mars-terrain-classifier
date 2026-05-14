@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from src.model.unet import MarsUNet
 from src.model.losses import CombinedLoss
 from src.data.dataset import AI4MarsDataset
+from pathlib import Path
 
 
 def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
@@ -12,6 +13,8 @@ def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
             device = "mps"
         else:
             device = "cpu"
+    Path("checkpoints").mkdir(exist_ok=True)
+
     dataset = AI4MarsDataset(data_root, split="train")
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     model = MarsUNet().to(device)
@@ -19,11 +22,21 @@ def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
     loss = CombinedLoss()
 
     for epoch in range(epochs):
-        for batch in dataloader:
+        for idx, batch in enumerate(dataloader):
             img, label = batch["image"].to(device), batch["mask"].to(device)
+            label = label.clamp(0, 4)
             optim.zero_grad()
             logits = model.forward(img)
             cost = loss(logits, label)
             cost.backward()
             optim.step()
-        print(f"epoch: {epoch} \t loss:{cost:.4f}")
+            if idx % 50 == 0:
+                print(
+                    f"epoch {epoch} | batch {idx}/{len(dataloader)} | loss: {cost.item():.4f}"
+                )
+        torch.save(model.state_dict(), f"checkpoints/unet_epoch_{epoch}.pth")
+        print(f"epoch {epoch} complete | checkpoint saved")
+
+
+if __name__ == "__main__":
+    train(data_root="data/ai4mars")
