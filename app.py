@@ -2,7 +2,8 @@ import streamlit as st
 import numpy as np
 import torch
 from PIL import Image
-from pathlib import sys, Path
+import sys
+from pathlib import Path
 from src.planner.visualize import colorize_segmentation, draw_path
 from src.planner.astar import AStarPlanner
 from src.model.unet import MarsUNet
@@ -32,6 +33,14 @@ def load_image():
     image = image.resize((512, 512))
     return image
 
+@st.cache_resource
+def load_model():
+    model = MarsUNet()
+    state = torch.load("checkpoints/unet_epoch_9.pth", map_location="cpu")
+    model.load_state_dict(state)
+    model.eval()
+    return model
+
 
 image = load_image()
 
@@ -43,7 +52,11 @@ with col1:
 
 with col2:
     st.subheader("Terrain Segmentation")
-    seg = np.random.randint(0, 5, (512, 512))
+    model = load_model()
+    img_array = np.array(image.convert("RGB"))
+    img_tensor = torch.tensor(img_array.transpose(2, 0, 1)).float().unsqueeze(0)
+    with torch.no_grad():
+        seg = model.predict(img_tensor).squeeze(0).numpy()
     img = colorize_segmentation(seg)
     st.image(img)
 
