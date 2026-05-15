@@ -17,9 +17,12 @@ def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
 
     dataset = AI4MarsDataset(data_root, split="train")
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    state = torch.load("checkpoints/unet_epoch_9.pth", map_location=device)
     model = MarsUNet().to(device)
+    model.load_state_dict(state)
     optim = torch.optim.Adam(model.parameters(), lr=lr)
-    loss = CombinedLoss()
+    class_weights = torch.tensor([1.5, 1.5, 1.5, 1.5, 0.2]).to(device)
+    loss = CombinedLoss(class_weights=class_weights)
 
     for epoch in range(epochs):
         for idx, batch in enumerate(dataloader):
@@ -34,9 +37,9 @@ def train(data_root, epochs=10, batch_size=8, lr=1e-4, device=None):
                 print(
                     f"epoch {epoch} | batch {idx}/{len(dataloader)} | loss: {cost.item():.4f}"
                 )
-        torch.save(model.state_dict(), f"checkpoints/unet_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"checkpoints/unet_v2_epoch_{epoch}.pth")
         print(f"epoch {epoch} complete | checkpoint saved")
 
 
 if __name__ == "__main__":
-    train(data_root="data/ai4mars")
+    train(data_root="data/ai4mars", epochs=3)

@@ -18,12 +18,12 @@ class DiceLoss(nn.Module):
         return 1 - dice
     
 class CombinedLoss(nn.Module):
-    def __init__(self, dice_weight=0.5):
+    def __init__(self, dice_weight=0.5, class_weights=None):
         super().__init__()
         self.dice_weight = dice_weight
         self.ce_weight = 1 - dice_weight
         self.dice = DiceLoss()
-        self.ce = nn.CrossEntropyLoss()
+        self.ce = nn.CrossEntropyLoss(class_weights=class_weights)
 
     def forward(self, predictions, targets):
         return self.dice_weight * self.dice(predictions, targets) + self.ce_weight * self.ce(predictions, targets)
