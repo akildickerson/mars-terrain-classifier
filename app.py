@@ -318,7 +318,7 @@ def load_image():
 @st.cache_resource
 def load_model():
     model = MarsUNet()
-    state = torch.load("checkpoints/unet_epoch_9.pth", map_location="cpu")
+    state = torch.load("checkpoints/unet_v2_epoch_2.pth", map_location="cpu")
     model.load_state_dict(state)
     model.eval()
     return model
@@ -515,7 +515,7 @@ with right:
         <div class="hud-panel">
           <div class="hud-meta">
             <span class="hud-coord">NODES <span>{path_len}</span></span>
-            <span class="hud-coord">MODEL <span>UNET-E9</span></span>
+            <span class="hud-coord">MODEL <span>UNET-V2</span></span>
             <span class="hud-coord">ALGO <span>A*</span></span>
           </div>
         </div>
